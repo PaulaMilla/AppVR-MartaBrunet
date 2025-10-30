@@ -1,8 +1,11 @@
 using UnityEngine;
 using Oculus.Interaction;
+using Oculus.Interaction.Locomotion;
 
 public class RoomController : MonoBehaviour
 {
+    public Transform roomSpawnPoint;
+
     public GameObject viñeta1;
     public GameObject viñeta2;
     public GameObject viñetaCompletado; // La que aparece sobre la caja
@@ -11,6 +14,42 @@ public class RoomController : MonoBehaviour
     public Grabbable objetoClaveGrabbable; // El OBJETO que tiene el script Grabbable
     public GameObject botonRetorno; // El botón para volver al menú
 
+
+    private void Awake()
+    {
+        if (roomSpawnPoint == null)
+        {
+            Debug.LogError("RoomController: roomSpawnPoint no está asignado en el inspector.");
+        }
+        else
+        {
+            //Buscar el CharacterController para moverlo
+            Oculus.Interaction.Locomotion.CharacterController playerController = FindFirstObjectByType<Oculus.Interaction.Locomotion.CharacterController>();
+
+            if (playerController != null)
+            {
+                playerController.SetPosition(roomSpawnPoint.position);
+                playerController.SetRotation(roomSpawnPoint.rotation);
+
+                Debug.Log($"RoomController: Posición del jugador establecida en '{roomSpawnPoint.name}' usando SetPosition().");
+
+                if (!playerController.gameObject.activeSelf)
+                {
+                    playerController.gameObject.SetActive(true);
+                }
+                if (!playerController.enabled)
+                {
+                    playerController.enabled = true;
+                }
+            }
+            else
+            {
+                Debug.LogError("RoomController: No se encontró CharacterController en la escena.");
+
+            }
+
+        }
+    }
 
     void Start()
     {

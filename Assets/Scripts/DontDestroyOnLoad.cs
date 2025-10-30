@@ -4,13 +4,16 @@ public class DontDestroyOnLoad : MonoBehaviour
 {
     void Awake()
     {
-        if (FindObjectsOfType<DontDestroyOnLoad>().Length > 1)
+        DontDestroyOnLoad[] persistentObjects = FindObjectsByType<DontDestroyOnLoad>(FindObjectsSortMode.None);
+
+        if (persistentObjects.Length > 1)
         {
+            // Ya existe uno. Destruimos este duplicado.
             Destroy(gameObject);
         }
         else
         {
-            // Si es el primero, le decimos que no se destruya al cambiar de escena.
+            // Es el primero. Le decimos que no se destruya.
             DontDestroyOnLoad(gameObject);
         }
     }

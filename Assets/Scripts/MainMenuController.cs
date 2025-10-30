@@ -1,5 +1,4 @@
 using UnityEngine;
-using Oculus.Interaction.Locomotion;
 using UnityEngine.UI;
 
 public class MainMenuController : MonoBehaviour
@@ -15,40 +14,46 @@ public class MainMenuController : MonoBehaviour
     public TutorialManager tutorialManager;
     public HuellaManager huellaManager;
 
+    private Oculus.Interaction.Locomotion.CharacterController _interactionCharacterController;
+
+
     void Awake()
     {
-        // Desactiva el GameObject completo que contiene TODOS los scripts de movimiento.
-        if (locomotorObject != null)
+        // --- LÓGICA DE MOVIMIENTO MODIFICADA ---
+        if(locomotorObject == null)
         {
-            locomotorObject.SetActive(false);
+            Debug.LogError("MainMenuController: locomotorObject no está asignado en el inspector.");
+            return;
+        }
+
+        _interactionCharacterController = locomotorObject.GetComponentInChildren<Oculus.Interaction.Locomotion.CharacterController>(true);
+
+        if(_interactionCharacterController == null)
+        {
+            Debug.LogError("MainMenuController: No se encontró CharacterController en locomotorObject.");
+            return;
         }
 
         // --- LÓGICA DE APARICIÓN (SPAWN) ---
-        // Esto posiciona al jugador ANTES de que se active
-        if (ProgressManager.Instance != null && locomotorObject != null)
+        // Esto ahora es seguro porque el _interactionCharacterController está deshabilitado.
+        if (ProgressManager.Instance != null)
         {
             int lastDoor = ProgressManager.Instance.lastExitedDoor;
+            Transform targetSpawnPoint = initialSpawnPoint;
 
-            if (lastDoor == 0 || initialSpawnPoint == null)
+            if (lastDoor > 0 && lastDoor - 1 < doorSpawnPoints.Length && doorSpawnPoints[lastDoor - 1] != null)
             {
-                // Si es la primera vez (0) o no hay puntos de spawn, usa el inicial
-                locomotorObject.transform.position = initialSpawnPoint.position;
-                locomotorObject.transform.rotation = initialSpawnPoint.rotation;
+                targetSpawnPoint = doorSpawnPoints[lastDoor - 1];
             }
-            else
-            {
-                // Si volvemos de una puerta, usa el punto de spawn de esa puerta
-                // (Restamos 1 porque el array empieza en 0)
-                if (lastDoor - 1 < doorSpawnPoints.Length && doorSpawnPoints[lastDoor - 1] != null)
-                {
-                    locomotorObject.transform.position = doorSpawnPoints[lastDoor - 1].position;
-                    locomotorObject.transform.rotation = doorSpawnPoints[lastDoor - 1].rotation;
-                }
-            }
+
+            // Esto es mucho más seguro que mover el transform.
+            _interactionCharacterController.SetPosition(targetSpawnPoint.position);
+            _interactionCharacterController.SetRotation(targetSpawnPoint.rotation);
+
+            Debug.Log($"MainMenuController: Posición del jugador establecida en '{targetSpawnPoint.name}' usando SetPosition().");
         }
     }
 
-    // Start() ahora puede quedar vacía o usarse para otra cosa.
     void Start()
     {
         int currentProgress = 0;
@@ -58,32 +63,30 @@ public class MainMenuController : MonoBehaviour
             ProgressManager.Instance.progressBarImage = this.progressBarUI;
             ProgressManager.Instance.UpdateProgressBar();
             currentProgress = ProgressManager.Instance.GetProgress();
-
-            // --- LÍNEA DE DEBUG ---
             Debug.Log($"--- MainMenu: Leí un progreso de {currentProgress} desde ProgressManager. ---");
-            // --- FIN DE LÍNEA ---
         }
 
         progressBarUI.gameObject.SetActive(currentProgress > 0);
 
         if (currentProgress == 0)
         {
+            // Es la primera vez, mostramos el panel.
+            // 'locomotorObject' permanece deshabilitado.
             welcomePanel.SetActive(true);
         }
         else
         {
+            // No es la primera vez, no hay panel.
             welcomePanel.SetActive(false);
-            if (locomotorObject != null)
-            {
-                locomotorObject.SetActive(true);
-            }
+
+            // 3. Activamos el GameObject 'Locomotor' (padre).
+            // "Despertará" en la posición que configuramos en Awake().
+            locomotorObject.SetActive(true);
+
             if (huellaManager != null && currentProgress < 6)
             {
-                // --- LÍNEA DE DEBUG ---
                 int pathToShow = currentProgress + 1;
-                Debug.LogWarning($"--- MainMenu: ¡Decidí mostrar el camino {pathToShow}! (Progreso {currentProgress} + 1) ---");
-                // --- FIN DE LÍNEA ---
-
+                Debug.LogWarning($"--- MainMenu: ¡Decidí mostrar el camino {pathToShow}! ---");
                 huellaManager.ShowPath(pathToShow);
             }
         }
@@ -96,17 +99,16 @@ public class MainMenuController : MonoBehaviour
             welcomePanel.SetActive(false);
         }
 
-        // Reactiva el GameObject completo, encendiendo todos los sistemas de movimiento.
-        if (locomotorObject != null)
+        // 4. Activamos el GameObject 'Locomotor' si no estaba activo ya
+        if (!locomotorObject.activeSelf)
         {
             locomotorObject.SetActive(true);
+            Debug.Log("MainMenuController: 'Locomotor' HABILITADO desde StartExperience.");
         }
 
         if (tutorialManager != null)
         {
             tutorialManager.StartMovementTutorial();
         }
-
-        Debug.Log("experience started");
     }
 }
