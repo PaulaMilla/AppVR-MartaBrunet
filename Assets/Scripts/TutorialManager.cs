@@ -3,46 +3,54 @@ using UnityEngine;
 public class TutorialManager : MonoBehaviour
 {
 
-    public GameObject movementTutorialPanel;
-
     public HuellaManager huellaManager;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        if (movementTutorialPanel != null)
+        if(PersistentRig.Instance != null)
         {
-            movementTutorialPanel.SetActive(false);
+            PersistentRig.Instance.ShowTutorial(false);
         }
     }
 
     public void StartMovementTutorial()
     {
-        // Esta función es llamada por MainMenuController.
-        if (movementTutorialPanel != null)
+        // Esta función es llamada por MainMenuController o por el botón persistente.
+        if(PersistentRig.Instance != null)
         {
-            movementTutorialPanel.SetActive(true);
+            PersistentRig.Instance.ShowTutorial(true);
         }
     }
 
     public void OnMovementTutorialFinished()
     {
-        // ... (tu código para ocultar el panel del tutorial) ...
-        if (movementTutorialPanel != null)
+        // Ocultar panel del tutorial
+        if (PersistentRig.Instance != null)
         {
-            movementTutorialPanel.SetActive(false);
+            PersistentRig.Instance.ShowTutorial(false);
         }
 
         if (huellaManager != null)
         {
             huellaManager.ShowPath(1); // Muestra el camino 1.
         }
-
-        // --- NUEVA LÍNEA ---
-        // Activa la barra de progreso por primera vez
-        if (ProgressManager.Instance != null && ProgressManager.Instance.progressBarImage != null)
+        else
         {
-            ProgressManager.Instance.progressBarImage.gameObject.SetActive(true);
+            Debug.LogWarning("TutorialManager: 'huellaManager' NO está asignado en el inspector.");
+        }
+
+        // Activa la barra de progreso por primera vez
+        if (PersistentRig.Instance != null)
+        {
+            PersistentRig.Instance.ShowProgressBarImage(true);
+        }
+
+        // Ahora que el tutorial terminó, activar locomotor para que el usuario pueda moverse
+        if (PersistentRig.Instance != null)
+        {
+            PersistentRig.Instance.ActivarLocomotor();
+            Debug.Log("TutorialManager: Activado locomotor tras terminar el tutorial.");
         }
     }
 }

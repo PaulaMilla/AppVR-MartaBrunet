@@ -5,17 +5,15 @@ public class ProgressManager : MonoBehaviour
 {
     public static ProgressManager Instance;
 
-    public Image progressBarImage;
     public Sprite[] progressSprites;
     private int currentProgress = 0;
 
-    // --- NUEVA LÍNEA ---
-    // Variable para recordar por dónde volvimos al menú
+
     public int lastExitedDoor = 0; // 0 = Inicio, 1 = Salió por Puerta 1, etc.
 
     void Awake()
     {
-        // ... (Tu código de Awake no cambia) ...
+ 
         if (Instance == null)
         {
             Instance = this;
@@ -33,6 +31,7 @@ public class ProgressManager : MonoBehaviour
         Debug.LogWarning($"--- ProgressManager: Recibí la orden de completar la habitación {roomIndex} ---");
         // --- FIN DE LÍNEA ---
 
+        // Actualiza el progreso solo si la habitación es nueva
         if (roomIndex > currentProgress)
         {
             currentProgress = roomIndex;
@@ -52,10 +51,14 @@ public class ProgressManager : MonoBehaviour
 
     public void UpdateProgressBar()
     {
-        // ... (Tu código de UpdateProgressBar no cambia) ...
-        if (progressBarImage != null && currentProgress < progressSprites.Length)
+        if(currentProgress < progressSprites.Length)
         {
-            progressBarImage.sprite = progressSprites[currentProgress];
+            Sprite newSprite = progressSprites[currentProgress];
+
+            if (PersistentRig.Instance != null)
+            {
+                PersistentRig.Instance.UpdateProgressSprite(newSprite);
+            }
         }
     }
 

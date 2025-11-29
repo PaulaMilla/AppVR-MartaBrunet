@@ -9,9 +9,12 @@ public class CajaAmarilla : MonoBehaviour
         //Comprobar si el objeto que entró es el objeto clave
         if (other.CompareTag("KeyObject"))
         {
-            // ¡Éxito!
 
-            //Se destruye el objeto clave para que no se pueda sacar
+            if (roomController != null)
+            {
+                roomController.NotificarObjetoDestruido(other.gameObject);
+            }
+
             Destroy(other.gameObject);
 
             //Avisar al "cerebro" (RoomController) que la tarea se completó

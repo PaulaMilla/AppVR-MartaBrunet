@@ -10,23 +10,35 @@ public class HuellaManager : MonoBehaviour
     public GameObject[] path5Footprints;
     public GameObject[] path6Footprints;
 
-
     // Puertas de cada habitación
     public DoorInteraction[] doors;
 
-    void Start()
+    // Desactivar huellas lo más pronto posible (Awake para evitar condiciones de carrera)
+    void Awake()
     {
         DeactivateAllFootprints();
     }
 
+    void Start()
+    {
+        // Mantengo Start vacío para no interferir con las activaciones hechas desde MainMenu.
+    }
+
     public void ShowPath(int pathIndex)
     {
-        DeactivateAllFootprints();
+        Debug.Log($"HuellaManager: ShowPath pedido para índice {pathIndex}");
 
-        // Nos aseguramos de que el índice sea válido para evitar errores
-        if (pathIndex > 0 && pathIndex <= doors.Length)
+        // Nos aseguramos de que el índice sea válido para evitar errores y desbloquear la puerta correspondiente
+        if (pathIndex > 0 && doors != null && pathIndex <= doors.Length && doors[pathIndex - 1] != null)
         {
             doors[pathIndex - 1].UnlockDoor();
+            Debug.Log($"HuellaManager: Puerta {pathIndex} desbloqueada.");
+        }
+        else
+        {
+            if (doors == null) Debug.LogWarning("HuellaManager: 'doors' es null.");
+            else if (pathIndex <= 0 || pathIndex > doors.Length) Debug.LogWarning($"HuellaManager: índice de puerta fuera de rango ({pathIndex}).");
+            else if (doors[pathIndex - 1] == null) Debug.LogWarning($"HuellaManager: door[{pathIndex - 1}] es null.");
         }
 
         GameObject[] pathToActivate = null;
@@ -50,24 +62,37 @@ public class HuellaManager : MonoBehaviour
             case 6:
                 pathToActivate = path6Footprints;
                 break;
+            default:
+                Debug.LogWarning($"HuellaManager: ShowPath recibió un índice no manejado: {pathIndex}");
+                break;
         }
 
         if (pathToActivate != null)
         {
+            int activated = 0;
             foreach (GameObject footprint in pathToActivate)
             {
-                footprint.SetActive(true);
+                if (footprint != null)
+                {
+                    footprint.SetActive(true);
+                    activated++;
+                }
             }
+            Debug.Log($"HuellaManager: Activadas {activated} huellas para el camino {pathIndex}.");
+        }
+        else
+        {
+            Debug.LogWarning($"HuellaManager: No hay arreglo de huellas asignado para el camino {pathIndex}.");
         }
     }
 
     private void DeactivateAllFootprints()
     {
-        foreach (GameObject footprint in path1Footprints) footprint.SetActive(false);
-        foreach (GameObject footprint in path2Footprints) footprint.SetActive(false);
-        foreach (GameObject footprint in path3Footprints) footprint.SetActive(false);
-        foreach (GameObject footprint in path4Footprints) footprint.SetActive(false);
-        foreach (GameObject footprint in path5Footprints) footprint.SetActive(false);
-        foreach (GameObject footprint in path6Footprints) footprint.SetActive(false);
+        if (path1Footprints != null) foreach (GameObject f in path1Footprints) if (f != null) f.SetActive(false);
+        if (path2Footprints != null) foreach (GameObject f in path2Footprints) if (f != null) f.SetActive(false);
+        if (path3Footprints != null) foreach (GameObject f in path3Footprints) if (f != null) f.SetActive(false);
+        if (path4Footprints != null) foreach (GameObject f in path4Footprints) if (f != null) f.SetActive(false);
+        if (path5Footprints != null) foreach (GameObject f in path5Footprints) if (f != null) f.SetActive(false);
+        if (path6Footprints != null) foreach (GameObject f in path6Footprints) if (f != null) f.SetActive(false);
     }
 }

@@ -5,11 +5,12 @@ using System.Collections;
 
 public class DoorInteraction : MonoBehaviour
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
 
     public GameObject openButtonCanvas;
     public Button openButton; 
     public string sceneNameToLoad;
+
+    public int doorId = 1;
 
     public Animator doorAnimator;
     public float animationDuration = 1.0f;
@@ -19,7 +20,6 @@ public class DoorInteraction : MonoBehaviour
 
     void Start()
     {
-        // El canvas del botón siempre empieza oculto
         if (openButtonCanvas != null)
         {
             openButtonCanvas.SetActive(false);
@@ -35,23 +35,20 @@ public class DoorInteraction : MonoBehaviour
     {
         if (other.CompareTag("Player"))
         {
-            // Primero, hacemos visible el canvas del botón
             if (openButtonCanvas != null)
             {
                 openButtonCanvas.SetActive(true);
             }
 
-            // Ahora, decidimos si el botón se puede presionar o no
             if (openButton != null)
             {
-                openButton.interactable = isUnlocked; 
+                openButton.interactable = isUnlocked;
             }
         }
     }
 
     private void OnTriggerExit(Collider other)
     {
-        // Al salir, ocultamos el canvas de nuevo
         if (other.CompareTag("Player"))
         {
             if (openButtonCanvas != null)
@@ -63,32 +60,56 @@ public class DoorInteraction : MonoBehaviour
 
     public void LoadRoomScene()
     {
-        
         if (isUnlocked && !string.IsNullOrEmpty(sceneNameToLoad) && !isLoading)
         {
-            SceneManager.LoadScene(sceneNameToLoad);
+            StartCoroutine(OpenDoorAndLoadScene());
         }
     }
 
-    public IEnumerator OpenDoorAndLoadScene()
+    private IEnumerator OpenDoorAndLoadScene()
     {
         isLoading = true;
 
-        if(openButton != null)
+        if (openButton != null)
         {
             openButton.interactable = false;
         }
 
-        //Activar el Trigger del Animator
-        if(doorAnimator != null)
+        // Animar la puerta
+        if (doorAnimator != null)
         {
             doorAnimator.SetTrigger("Abrir");
         }
 
-        //Esperar a que termine la animación
         yield return new WaitForSeconds(animationDuration);
 
-        //Cargar la nueva escena
-        SceneManager.LoadScene(sceneNameToLoad);
+        // Guardar progreso antes de cambiar de escena
+        if (ProgressManager.Instance != null)
+        {
+            ProgressManager.Instance.lastExitedDoor = doorId;
+            Debug.LogWarning($"--- DoorInteraction: Guardando lastExitedDoor = {doorId} en ProgressManager ---");
+        }
+
+        // NOTA: ya no desactivamos ni manipulamos CharacterController aquí.
+        // PersistentRig se encargará de desactivar/activar locomotor cuando corresponda.
+
+        // Iniciar la carga asíncrona
+        AsyncOperation asyncLoad = SceneManager.LoadSceneAsync(sceneNameToLoad);
+        asyncLoad.allowSceneActivation = false;
+
+        // Esperar hasta que la carga esté casi lista
+        while (asyncLoad.progress < 0.9f)
+        {
+            yield return null;
+        }
+
+        // Activar la escena una vez cargada completamente
+        asyncLoad.allowSceneActivation = true;
+
+        // Esperar 1 frame para asegurar que todo se haya inicializado
+        yield return null;
+
+        // No reactivamos CharacterController aquí; PersistentRig / RoomController llamará a MoveAndReactivateRoutine
+        isLoading = false;
     }
 }

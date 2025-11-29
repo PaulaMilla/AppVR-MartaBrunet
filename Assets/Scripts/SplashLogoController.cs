@@ -5,41 +5,46 @@ using UnityEngine.UI;
 
 public class SplashLogoController : MonoBehaviour
 {
-
     public Sprite[] logos;
     public Image splashImage;
     public float imageDuration = 2f;
     public float fadeDuration = 0.5f;
 
-    //Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    private void Start()
     {
         splashImage.color = new Color(1, 1, 1, 0);
         splashImage.raycastTarget = false;
+
         StartCoroutine(PlaySplash());
     }
 
     private IEnumerator PlaySplash()
     {
+        // Reproduce cada logo
         for (int i = 0; i < logos.Length; i++)
         {
             splashImage.sprite = logos[i];
 
-            //Fade in
+            // Fade In
             yield return StartCoroutine(FadeImage(1, fadeDuration));
 
-            // Mantener imagen visible
+            // Esperar
             yield return new WaitForSeconds(imageDuration);
 
-            //Fade out
+            // Fade Out
             yield return StartCoroutine(FadeImage(0, fadeDuration));
-
-            //Reset sprite al terminar el fade out
             splashImage.sprite = null;
         }
 
-        //Cargar siguiente escena
-        SceneManager.LoadScene("MainMenu");
+        Debug.Log("Splash: Animaciones terminadas. Esperando Firebase...");
+
+        // Esperar a que FirebaseInitializer termine todo
+        while (!FirebaseInitializer.Instance.IsReady)
+            yield return null;
+
+        Debug.Log("Splash: Firebase listo. Cargando Login...");
+
+        SceneManager.LoadScene("Login");
     }
 
     private IEnumerator FadeImage(float targetAlpha, float duration)
