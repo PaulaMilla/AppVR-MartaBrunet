@@ -19,6 +19,7 @@ public class LoginController : MonoBehaviour
     public VideoPlayer videoPlayer;
     public GameObject canvasTeclado;
     public GameObject canvasBoton;
+    public GameObject botonSkip;
 
     private async void Start()
     {
@@ -30,6 +31,9 @@ public class LoginController : MonoBehaviour
 
         canvasTeclado.SetActive(false);
         canvasBoton.SetActive(false);
+
+        if (botonSkip != null)
+            botonSkip.SetActive(true);
 
         videoPlayer.loopPointReached += OnVideoFinished;
         videoPlayer.time = 0;
@@ -44,8 +48,26 @@ public class LoginController : MonoBehaviour
 
     void OnVideoFinished(VideoPlayer vp)
     {
+        ActivarInterfazLogin();
+    }
+
+    private void ActivarInterfazLogin()
+    {
         canvasTeclado.SetActive(true);
         canvasBoton.SetActive(true);
+
+        if (botonSkip != null)
+            botonSkip.SetActive(false);
+    }
+
+    public void SkipTutorial()
+    {
+        if(videoPlayer.isPlaying)
+        {
+            videoPlayer.Stop();
+        }
+
+        ActivarInterfazLogin();
     }
 
     private async Task WaitForFirebase()

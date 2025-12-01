@@ -1,6 +1,7 @@
 using Firebase.Firestore;
 using System.Collections;
 using System.Linq;
+using TMPro;
 using UnityEngine;
 
 public class MainMenuController : MonoBehaviour
@@ -105,6 +106,7 @@ public class MainMenuController : MonoBehaviour
                 emailCanvas.SetActive(true);
                 emailButtonCanvas.SetActive(true);
             }
+
             alreadyAskedEmail = true;
         }
         else
@@ -140,7 +142,7 @@ public class MainMenuController : MonoBehaviour
         LoadLeaderboard();
     }
 
-    
+ 
 
     private async void LoadLeaderboard()
     {
@@ -229,9 +231,9 @@ public class MainMenuController : MonoBehaviour
 
             int p = UserSession.Instance != null ? UserSession.Instance.puntaje : 0;
 
-            if(p>= 3000)
+            if(p>= 750)
                 AplicarMaterialEstatua(faseActiva, matOro);
-            else if(p>= 2000)
+            else if(p>= 250)
                 AplicarMaterialEstatua(faseActiva, matPlata);
             else
                 AplicarMaterialEstatua(faseActiva, matBronce);

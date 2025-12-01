@@ -23,6 +23,8 @@ public class SendGridEmailSender : MonoBehaviour
     public GameObject canvasEmailInput;
     public GameObject canvasEmailButton;
 
+    public GameObject canvasBotonReintentar;
+
     public void EnviarCertificado()
     {
         string userEmail = userEmailInput.text.Trim();
@@ -81,6 +83,7 @@ public class SendGridEmailSender : MonoBehaviour
 
         canvasEmailButton.SetActive(false);
         canvasEmailInput.SetActive(false);
+        canvasBotonReintentar.SetActive(true);
 
         if (request.result == UnityWebRequest.Result.Success)
         {
@@ -96,7 +99,22 @@ public class SendGridEmailSender : MonoBehaviour
             canvasFailed.SetActive(true);
             canvasFailedLogo.SetActive(true);
         }
-
         request.Dispose();
+    }
+
+    public void ResetearFormularioEmail()
+    {
+        if (userEmailInput != null)
+        {
+            userEmailInput.text = "";
+        }
+        if(canvasEmailInput != null) canvasEmailInput.SetActive(true); 
+        if (canvasEmailButton != null) canvasEmailButton.SetActive(true);
+        if (canvasBotonReintentar != null) canvasBotonReintentar.SetActive(false);
+        if(canvasSuccess != null) canvasSuccess.SetActive(false);
+        if(canvasSuccessLogo != null) canvasSuccessLogo.SetActive(false);
+        if(canvasFailed != null) canvasFailed.SetActive(false);
+        if(canvasFailedLogo != null) canvasFailedLogo.SetActive(false);
+        Debug.Log("UI Actualizada: Formulario reseteado.");
     }
 }
