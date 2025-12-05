@@ -1,0 +1,2 @@
+D:\ProyectoTitulo\V3\AppVR\Library\Bee\Android\Prj\IL2CPP\Gradle\unityLibrary\src\main\cpp\CMakeLists.txt
+D:\ProyectoTitulo\V3\AppVR\Library\Bee\Android\Prj\IL2CPP\Gradle\unityLibrary\src\main\cpp\GameActivity\CMakeLists.txt

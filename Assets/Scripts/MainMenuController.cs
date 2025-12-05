@@ -1,7 +1,6 @@
 using Firebase.Firestore;
 using System.Collections;
 using System.Linq;
-using TMPro;
 using UnityEngine;
 
 public class MainMenuController : MonoBehaviour
@@ -30,6 +29,7 @@ public class MainMenuController : MonoBehaviour
     public GameObject emailCanvas;
     public GameObject emailButtonCanvas;
     public bool alreadyAskedEmail = false;
+    public GameObject TituloCanvas;
 
     void Awake()
     {
@@ -106,6 +106,10 @@ public class MainMenuController : MonoBehaviour
                 emailCanvas.SetActive(true);
                 emailButtonCanvas.SetActive(true);
             }
+            if(TituloCanvas != null)
+            {
+                TituloCanvas.SetActive(true);
+            }
 
             alreadyAskedEmail = true;
         }
@@ -115,6 +119,7 @@ public class MainMenuController : MonoBehaviour
             {
                 emailCanvas.SetActive(false);
                 emailButtonCanvas.SetActive(false);
+                TituloCanvas.SetActive(false);
             }
         }
 
